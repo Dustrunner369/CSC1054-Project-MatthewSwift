@@ -27,9 +27,7 @@ public abstract class DrawableObject
    //this method you implement for each object you want to draw. Act as if the thing you want to draw is at x,y.
    //NOTE: DO NOT CALL DRAWME YOURSELF. Let the the "draw" method do it for you. I take care of the math in that method for a reason.
    public abstract void drawMe(float x, float y, GraphicsContext gc);
-   public void act()
-   {
-   }
+   public void act(){}
    
    public float getX(){return x;}
    public float getY(){return y;}

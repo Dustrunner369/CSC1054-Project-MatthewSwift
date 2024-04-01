@@ -2,10 +2,10 @@ import javafx.scene.paint.*;
 import javafx.scene.canvas.*;
 
 //this is an example object
-public class TestObject extends DrawableObject
+public class Player extends DrawableObject
 {
 	//takes in its position
-   public TestObject(float x, float y)
+   public Player(float x, float y)
    {
       super(x,y);
    }
