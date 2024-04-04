@@ -202,7 +202,7 @@ public class Main extends Application
          thePlayer.setX(thePlayer.getX() + (forceX * playerSpeed));
          
          //Update score
-         score = (Math.abs((int)thePlayer.getX() - 300)) + (Math.abs((int)thePlayer.getY() - 300));
+         score = (int)(Math.sqrt((thePlayer.getX()-300)*(thePlayer.getX()-300) + (thePlayer.getY()-300)*(thePlayer.getY()-300)));
          playerScore.setText("Score: " + score);
          
          //Mine Logic
@@ -224,31 +224,61 @@ public class Main extends Application
          
          
          if(playerGridChanged){
-            for(int i = 0; i < 3; i++){
+            
                int x;
                int y;
                //Moving Left
-               if(cgridx < 0){
-                  x = ((cgridx - 3) * 100) + (int)(Math.random() * 99);
+               // if(cgridx < 0){
+//                   x = ((cgridx - 3) * 100) + (int)(Math.random() * 99);
+//                }
+//                //Moving Right
+//                else{
+//                   x = ((cgridx + 3) * 100) + (int)(Math.random() * 99);
+//                }
+//                //Moving Up
+//                if(cgridy < 0){
+//                   y = ((cgridy - 3) * 100) + (int)(Math.random() * 99);
+//                }
+//                //Moving Down
+//                else{
+//                   y = ((cgridy + 3) * 100) + (int)(Math.random() * 99);
+//                }
+               
+               y = ((cgridy - 4) * 100) + (int)(Math.random() * 99);
+               for(int j = -5; j < 5; j++){
+               
+                  int temp = cgridx + j;   
+                  x = (temp * 100) + (int)(Math.random() * 99);
+                  mineList.add(new Mine(x, y));   
                }
-               //Moving Right
-               else{
-                  x = ((cgridx + 3) * 100) + (int)(Math.random() * 99);
-               }
-               //Moving Up
-               if(cgridy < 0){
-                  y = ((cgridy - 3) * 100) + (int)(Math.random() * 99);
-               }
-               //Moving Down
-               else{
-                  y = ((cgridy + 3) * 100) + (int)(Math.random() * 99);
+               y = ((cgridy + 3) * 100) + (int)(Math.random() * 99);
+               for(int j = -5; j < 5; j++){
+               
+                  int temp = cgridx + j;   
+                  x = (temp * 100) + (int)(Math.random() * 99);
+                  mineList.add(new Mine(x, y));   
                }
                
-               System.out.println(cgridx +  "  " + cgridy);
-               System.out.println(x +  "  " + y);
+               x = ((cgridx - 4) * 100) + (int)(Math.random() * 99);
+               for(int j = -5; j < 5; j++){
                
-               mineList.add(new Mine(x, y));
-            }   
+                  int temp = cgridy + j;   
+                  y = (temp * 100) + (int)(Math.random() * 99);
+                  mineList.add(new Mine(x, y));   
+               }
+               x = ((cgridx + 3) * 100) + (int)(Math.random() * 99);
+               for(int j = -5; j < 5; j++){
+               
+                  int temp = cgridy + j;   
+                  y = (temp * 100) + (int)(Math.random() * 99);
+                  mineList.add(new Mine(x, y));   
+               }
+               
+               //System.out.println(cgridx +  "  " + cgridy);
+               //System.out.println(x +  "  " + y);
+               //System.out.println(thePlayer.distance();
+               
+               
          }
          
          

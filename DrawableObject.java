@@ -36,6 +36,6 @@ public abstract class DrawableObject
    
    public double distance(DrawableObject other)
    {
-      return (Math.sqrt((other.x-x)*(other.x-x) +  (other.y-y)*(other.y-y)   ));
+      return (Math.sqrt((other.x-x)*(other.x-x) + (other.y-y)*(other.y-y)));
    }
 }
