@@ -131,7 +131,7 @@ public class Main extends Application
       playerx*=.1;
       playery*=.1;
    
-	//figuring out the tile's position.
+	   //figuring out the tile's position.
       float x = (playerx) / 400;
       float y = (playery) / 400;
       
