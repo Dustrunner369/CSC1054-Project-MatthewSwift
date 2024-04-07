@@ -5,15 +5,15 @@ import java.lang.*;
 //this is an example object
 public class Mine extends DrawableObject
 {
-   static double colorValue = Math.random();
-   static int way = 1;
+   double colorValue = Math.random();
+   int way = 1;
    int randomColor = (int)(Math.random() * 2) + 1;
 	//takes in its position
    public Mine(float x, float y)
    {
       super(x,y);
    }
-   public static void advanceColor()
+   public void advanceColor()
    {
       colorValue += 0.01f * way;
       

@@ -37,19 +37,24 @@ public class Main extends Application
    StackPane sp;
    Canvas theCanvas = new Canvas(600,600);
    AnimationTimer ta;
-   Label playerScore;
-   Label highScore;
+   Label playerScoreLabel;
+   Label highScoreLabel;
    GraphicsContext gc;
    Player thePlayer = new Player(300,300);
-   Mine mine = new Mine(250,250);
+   Mine collidedMine = null;
    ArrayList<Mine> mineList = new ArrayList<Mine>();
+   PrintWriter pw = null;
+   FileWriter myWriter = null;
+   File myFile = null;
+   Scanner scan = null;
    
    
    //Initialize Variables
    boolean keyUp, keyDown, keyLeft, keyRight;
-   float forceX, forceY, playerSpeed = 1;
+   float forceX, forceY, playerSpeed = .5f;
    int score = 0;
-   int highScoreCounter;
+   int highScoreCounter = 0;
+   boolean collisionOccured = false;
    
    int oldPlayerPositionX = ((int)thePlayer.getX())/100;
    int oldPlayerPositionY = ((int)thePlayer.getY())/100;
@@ -68,21 +73,44 @@ public class Main extends Application
       drawBackground(300,300,gc);
       
       //Add score and highscore to flowpane.
-      playerScore = new Label("Score: " + score);
-      playerScore.setTextFill(Color.WHITE);
-      playerScore.setTranslateX(-270);
-      playerScore.setTranslateY(-290);
+      playerScoreLabel = new Label("Score: " + score);
+      playerScoreLabel.setTextFill(Color.WHITE);
+      playerScoreLabel.setTranslateX(-270);
+      playerScoreLabel.setTranslateY(-290);
       
-      highScore = new Label("High Score: " + score);
-      highScore.setTextFill(Color.WHITE);
-      highScore.setTranslateX(-255);
-      highScore.setTranslateY(-275);
+      highScoreLabel = new Label("High Score: " + score);
+      highScoreLabel.setTextFill(Color.WHITE);
+      highScoreLabel.setTranslateX(-255);
+      highScoreLabel.setTranslateY(-275);
       
-      sp.getChildren().add(playerScore);
-      sp.getChildren().add(highScore);
+      sp.getChildren().add(playerScoreLabel);
+      sp.getChildren().add(highScoreLabel);
       
       fp.getChildren().add(sp);
       
+      //Open file and read score from it.
+      try{
+         myFile = new File("highscore.txt");
+         
+         if (myFile.exists() && !myFile.isDirectory()){            
+            scan = new Scanner(myFile);
+            if (scan.hasNextInt()) {               
+               highScoreCounter = scan.nextInt();
+            }   
+            else {
+               highScoreCounter = 0;
+            }
+         }
+         else{
+            myFile.createNewFile();
+         }         
+         myWriter = new FileWriter(myFile);         
+      } 
+      catch (IOException e) {
+         System.out.println("An error occurred.");
+         e.printStackTrace();
+      }
+                 
       Scene scene = new Scene(fp, 600, 600);
       stage.setScene(scene);
       stage.setTitle("Project :)");
@@ -92,9 +120,6 @@ public class Main extends Application
       ta = new AnimationHandler();
       ta.start();
    }
-   
-   
-   
    
    Image background = new Image("stars.png");
    Image overlay = new Image("starsoverlay.png");
@@ -152,7 +177,8 @@ public class Main extends Application
          //System.out.println(thePlayer.getX()+ " "+thePlayer.getY());
 
 	      //example calls of draw - this should be the player's call for draw
-         thePlayer.draw(300,300,gc,true); //all other objects will use false in the parameter.
+         if(!collisionOccured)
+            thePlayer.draw(300,300,gc,true); //all other objects will use false in the parameter.
 
          //example call of a draw where m is a non-player object. Note that you are passing the player's position in and not m's position.
          
@@ -203,11 +229,16 @@ public class Main extends Application
          
          //Update score
          score = (int)(Math.sqrt((thePlayer.getX()-300)*(thePlayer.getX()-300) + (thePlayer.getY()-300)*(thePlayer.getY()-300)));
-         playerScore.setText("Score: " + score);
+         
+         
+         if(score > highScoreCounter){
+            highScoreCounter = score;
+         }
+         
+         playerScoreLabel.setText("Score: " + score);
+         highScoreLabel.setText("High score: " + highScoreCounter);
          
          //Mine Logic
-         Mine.advanceColor();
-         
          boolean playerGridChanged = false; 
          int cgridx = ((int)thePlayer.getX())/100;
          int cgridy = ((int)thePlayer.getY())/100;
@@ -221,71 +252,82 @@ public class Main extends Application
             playerGridChanged = true;
          }
          
-         
+         int n = (int)score/1000;
          
          if(playerGridChanged){
             
-               int x;
-               int y;
-               //Moving Left
-               // if(cgridx < 0){
-//                   x = ((cgridx - 3) * 100) + (int)(Math.random() * 99);
-//                }
-//                //Moving Right
-//                else{
-//                   x = ((cgridx + 3) * 100) + (int)(Math.random() * 99);
-//                }
-//                //Moving Up
-//                if(cgridy < 0){
-//                   y = ((cgridy - 3) * 100) + (int)(Math.random() * 99);
-//                }
-//                //Moving Down
-//                else{
-//                   y = ((cgridy + 3) * 100) + (int)(Math.random() * 99);
-//                }
+            int x;
+            int y;
                
-               y = ((cgridy - 4) * 100) + (int)(Math.random() * 99);
+            for(int i = 0; i < n; i++){ 
+               y = ((cgridy - 5) * 100) + (int)(Math.random() * 99);
                for(int j = -5; j < 5; j++){
-               
-                  int temp = cgridx + j;   
-                  x = (temp * 100) + (int)(Math.random() * 99);
-                  mineList.add(new Mine(x, y));   
+                  int percentChance = (int)(Math.random() * 100) + 1;
+                  if(percentChance < 30){
+                     int temp = cgridx + j;   
+                     x = (temp * 100) + (int)(Math.random() * 99);
+                     mineList.add(new Mine(x, y));
+                  }
                }
-               y = ((cgridy + 3) * 100) + (int)(Math.random() * 99);
+               y = ((cgridy + 4) * 100) + (int)(Math.random() * 99);
                for(int j = -5; j < 5; j++){
-               
-                  int temp = cgridx + j;   
-                  x = (temp * 100) + (int)(Math.random() * 99);
-                  mineList.add(new Mine(x, y));   
+                  int percentChance = (int)(Math.random() * 100) + 1;
+                  if(percentChance < 30){
+                     int temp = cgridx + j;   
+                     x = (temp * 100) + (int)(Math.random() * 99);
+                     mineList.add(new Mine(x, y));
+                  }   
                }
                
-               x = ((cgridx - 4) * 100) + (int)(Math.random() * 99);
+               x = ((cgridx - 5) * 100) + (int)(Math.random() * 99);
                for(int j = -5; j < 5; j++){
-               
-                  int temp = cgridy + j;   
-                  y = (temp * 100) + (int)(Math.random() * 99);
-                  mineList.add(new Mine(x, y));   
+                  int percentChance = (int)(Math.random() * 100) + 1;
+                  if(percentChance < 30){
+                     int temp = cgridy + j;   
+                     y = (temp * 100) + (int)(Math.random() * 99);
+                     mineList.add(new Mine(x, y));
+                  }   
                }
-               x = ((cgridx + 3) * 100) + (int)(Math.random() * 99);
+               x = ((cgridx + 4) * 100) + (int)(Math.random() * 99);
                for(int j = -5; j < 5; j++){
-               
-                  int temp = cgridy + j;   
-                  y = (temp * 100) + (int)(Math.random() * 99);
-                  mineList.add(new Mine(x, y));   
+                  int percentChance = (int)(Math.random() * 100) + 1;
+                  if(percentChance < 30){
+                     int temp = cgridy + j;   
+                     y = (temp * 100) + (int)(Math.random() * 99);
+                     mineList.add(new Mine(x, y));  
+                  } 
                }
-               
-               //System.out.println(cgridx +  "  " + cgridy);
-               //System.out.println(x +  "  " + y);
-               //System.out.println(thePlayer.distance();
-               
-               
+            } 
          }
          
+         if(collisionOccured)
+            ta.stop();
          
-         for(Mine mine : mineList){
-            mine.draw(thePlayer.getX(),thePlayer.getY(),gc,false);
+         //Loops through all the mines
+         for(int i = 0; i < mineList.size(); i++){
+            if(mineList.get(i) != collidedMine){
+               mineList.get(i).draw(thePlayer.getX(),thePlayer.getY(),gc,false);
+               mineList.get(i).advanceColor();
+            }
+                              
+            //End the game when a mine and player are within 20 pixels of each other
+            if(thePlayer.distance(mineList.get(i)) < 20){
+               collisionOccured = true;
+               collidedMine = mineList.get(i);
+               try{
+                  myWriter.write("" + highScoreCounter);
+                  myWriter.close();
+               }
+               catch(Exception e){
+                  System.out.println(e);
+               }
+            }
+            //Removes mine if distance is greater than 800
+            if(thePlayer.distance(mineList.get(i)) > 800){
+               mineList.remove(i);
+               i--;
+            }
          }
-         
       }
    }
    
@@ -293,18 +335,14 @@ public class Main extends Application
    {
       public void handle(KeyEvent event) 
       { 
-         if (event.getCode() == KeyCode.W){ 
+         if (event.getCode() == KeyCode.W)
             keyUp = true;
-         }
-         if (event.getCode() == KeyCode.A){
+         if (event.getCode() == KeyCode.A)
             keyLeft = true;
-         }
-         if (event.getCode() == KeyCode.S){
-            keyDown = true;
-         } 
-         if (event.getCode() == KeyCode.D){
+         if (event.getCode() == KeyCode.S)
+            keyDown = true; 
+         if (event.getCode() == KeyCode.D)
             keyRight = true;
-         }
       }
    }
    
@@ -322,12 +360,9 @@ public class Main extends Application
             keyRight = false;
       }
    }
-
-
+   
    public static void main(String[] args)
    {
       launch(args);
    }
 }
-
-
